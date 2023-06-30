@@ -1,0 +1,149 @@
+---
+title: "GetCleanPBDB"
+output:
+  html_document: default
+  word_document: default
+  pdf_document: default
+date: "2023-23-07"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# setup environment
+```{r}
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(velociraptr,palaeoverse,deeptime,tidyverse,divDyn,ape,phytools,paleotree,dispRity,ggalt,dplyr,ggplot2,RCurl,janitor,fossilbrush)
+```
+
+# download the PBDB data using the source API
+# All dinosaur occurances
+
+```{r}
+url <- "https://paleobiodb.org/data1.2/occs/list.csv?base_name=dinosauria&interval=Triassic,Cretaceous&show=full,classext,genus,acconly,ident,img,etbasis,class"
+
+occs_df <- read.csv(url)
+```
+
+
+# now do some tidying up of the data by removing unwanted columns and remap any min_age that falls outside the Mesozoic.
+# Also remove any occurance with no order, family or genus
+# remove ootaxa and ichnotaxa
+
+
+```{r}
+# remove unwanted columns
+
+keep <- c("accepted_name","accepted_rank","early_interval","late_interval","max_ma","min_ma","phylum","class","order","family","genus","lng","lat","cc","state","county","paleolng","paleolat","formation","stratgroup","member","assembl_comps")
+
+occs_df <- occs_df[keep]
+
+occs_df$min_ma[occs_df$min_ma < 66] <- 66
+occs_df$max_ma[occs_df$max_ma > 251.902] <- 251.902
+
+#now modify the ealy and later interval column to remove "Early, Middle or Late"
+occs_df$early_interval <- sub('Early ','',occs_df$early_interval)
+occs_df$early_interval <- sub('Middle ','',occs_df$early_interval)
+occs_df$early_interval <- sub('Late ','',occs_df$early_interval)
+
+occs_df$late_interval <- sub('Early ','',occs_df$late_interval)
+occs_df$late_interval <- sub('Middle ','',occs_df$late_interval)
+occs_df$late_interval <- sub('Late ','',occs_df$late_interval)
+
+# use the fossilbrush package to clean up chronostratigraphic information to GTS2020 values
+
+occs_df <- chrono_scale(occs_df, srt = "early_interval", end = "late_interval",max_ma = "max_ma", min_ma = "min_ma", verbose = FALSE)
+
+# create time bins for Mesozoic Stages
+MesozoicStage_bins <- time_bins(interval = c("Mesozoic"),rank="stage")
+
+# bin the occurance data into new DF
+MesozoicStage_Occs  <- bin_time(occs_df,MesozoicStage_bins) 
+colnames(MesozoicStage_Occs)[colnames(MesozoicStage_Occs)=="bin_assignment"]="bin"
+MesozoicStage_Occs <- merge(MesozoicStage_Occs,MesozoicStage_bins[,c("bin","interval_name","colour")],by="bin")
+
+
+# rename the cols to fit later coding
+# original min and max ma to PBDBmin_ma and PBDBmax_ma and the GTS2020 codes to GTS2020min_ma and GT2020max_ma
+MesozoicStage_Occs <- MesozoicStage_Occs %>% 
+  rename(
+    min_maPBDB = min_ma,
+    max_maPBDB = max_ma,
+    GTS2020min_ma = newLAD,
+    GTS2020max_ma = newFAD
+    )
+
+
+# extract microfossils
+
+microverts <- 
+  MesozoicStage_Occs %>%
+  janitor::clean_names() %>%           # standardizes names
+  filter(!grepl("oolithidae",family)) %>% #remove ootaxa and ichnotaxa
+  filter(!grepl("podidae",family)) %>%
+  filter(!grepl("podos",genus)) %>%
+  filter(!grepl("podus",genus)) %>%
+  filter(grepl("microfossils",assembl_comps)) %>% #extract microfossils
+  filter(!grepl("Aves",class)) # remove Aves
+
+
+MicrovertsByStage <- microverts %>%
+  group_by(bin_midpoint) %>%
+  summarise(count=n())
+
+
+
+# extract macrofossils
+
+macroverts <- 
+  MesozoicStage_Occs %>%
+  janitor::clean_names() %>%           # standardizes names
+  filter(!grepl("oolithidae",family)) %>% #remove ootaxa and ichnotaxa
+  filter(!grepl("podidae",family)) %>%
+  filter(!grepl("podos",genus)) %>%
+  filter(!grepl("podus",genus)) %>%
+  filter(!grepl("microfossils",assembl_comps)) %>% #extract microfossils
+  filter(!grepl("Aves",class)) # remove Aves
+
+
+MacrovertsByStage <- macroverts %>%
+  group_by(bin_midpoint) %>%
+  summarise(count=n())
+
+# combine the data
+
+StageData <- merge(MicrovertsByStage,MacrovertsByStage,by="bin_midpoint")
+
+StageData <- StageData %>% 
+  rename(
+    micro = count.x,
+    macro = count.y
+    )
+
+StageData <- StageData %>% pivot_longer(., cols = c(micro, macro))
+
+```
+
+# create some plots
+
+```{r}
+
+p <- ggplot(StageData, aes(x=bin_midpoint, y=value)) +
+  geom_bar(stat="identity",width=2.5, position="stack",aes(fill=name)) + 
+  scale_fill_manual("",labels=c("Macro remains", "Microvertebrates"),values=c("#E69F00", "#0072B2")) + 
+  scale_x_reverse() +
+  ylab("Occurence count") + 
+  xlab("") +
+#  coord_geo(pos=as.list(rep("bottom",3)), dat=list("stages","epochs","periods"), height=list(unit(2,"lines"),unit(2,"lines"),unit(2,"line")), rot=list(90,0,0),size=list(2.5,2.5,5),abbrv=list(TRUE,FALSE,FALSE)) +
+  coord_geo(pos=as.list(rep("bottom",2)), dat=list("epochs","periods"), height=list(unit(2,"lines"),unit(2,"lines")), rot=list(0,0),size=list(2.5,5),abbrv=list(FALSE,FALSE)) +
+    theme_minimal() +
+    theme(legend.position='top', 
+        legend.justification='left',
+        legend.direction='horizontal') 
+
+
+pdf(file="PBDB_MIcrovertebrates.pdf", width=14/2.54, height=14/2.54)
+p
+dev.off()

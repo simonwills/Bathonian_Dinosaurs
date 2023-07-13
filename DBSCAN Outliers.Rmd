@@ -1,0 +1,68 @@
+---
+title: "DBSCAN Outlier Detection"
+author: "Simon Wills"
+date: "2023-07-13"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+## Setup Environment
+```{r}
+library(devtools)
+install_github("olobiolo/centroidr")
+library(centroidr)
+
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(centroidr,dbscan,fpc,jsonlite,shiny,GGally,WVPlots,ggplot2,SamSPECTRAL,ggrepel,ggpubr,gridExtra,mda)
+```
+
+
+## Now load up data to test for outliers.
+## We need a data frame with a Specimen ID, Taxon (or grouping taxon) and the varibales to test for outliers
+## The varibles could either be in 'raw' state or ordinated such as MDA, PCA or t-SNE
+## I generally use MDA 
+
+```{r}
+df <- read.csv("C:/Users/swill/OneDrive - Natural History Museum/Manuscripts/PhD Chapters/MainThesis/CompleteThesis/DataForAppendicies/RESULTS_TrainingDatawithPostProbs_and_MDA.csv")
+
+df <- as.data.frame(df[,c(2,3,46,47,48,49,50)])
+```
+
+## Clean up the data by dropping any clades with < 5 members
+## There shouldn't be any as these should be dropped already.
+
+```{r}
+df <- df[df$GroupID %in% names(table(df$GroupID)) [table(df$GroupID) > 5],]
+df$GroupID <- factor(df$GroupID)
+```
+
+```{r}
+IDs <- sort(unique(df$GroupID))
+```
+
+
+## run DBSCAN
+
+```{r}
+plot_list_eps <- list()
+counter = 0
+for (V1 in IDs) {
+  counter = counter +1
+  cat(counter)
+  kn.dist <- as.data.frame(sort(kNNdist(df[df$GroupID==V1,3:7],k=5)))
+  kn.dist$point <- seq(1,nrow(kn.dist),by=1)
+  colnames(kn.dist) <- c("dist","point")
+  plot_list_eps[[V1]] <- ggplot(kn.dist) +
+    geom_point(mapping=aes(x=point,y=dist),color="red") +
+    theme(plot.title=element_text(size=8))+
+    ggtitle(paste(V1))+
+    labs(x="Point index") +
+    labs(y="Distance (knn=5)") +
+    theme_bw()
+}
+

@@ -1,0 +1,230 @@
+---
+title: "DeepTimePlotting"
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+date: '2022-11-16'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+
+## setup environment
+```{r}
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(velociraptr,palaeoverse,deeptime,tidyverse,divDyn,ape,phytools,paleotree,dispRity,ggalt,dplyr,stringr,viridis,hrbrthemes,mapdata,cowplot,ggplot2,mapsf,sf,ggspatial,rnaturalearth,rnaturalearthdata,geojsonsf,RCurl,raster)
+```
+
+## to download and clean the data GetPBDBClean.Rmd script
+## this produces a dataframe called taxa_filter
+
+
+
+## get taxonomic ranges
+
+```{r}
+tax_range_time(occdf=taxa_filter,name="accepted_name", plot=TRUE)
+
+taxa_range <- tax_range_time(occdf=taxa_filter,name="accepted_name", plot=FALSE)
+
+```
+
+
+# add useful columns
+```{r}
+# first add a 'genus' column based on the 'generic' part of taxon identifer
+taxa_range$genus <- word(taxa_range$taxon,1)
+#now extract the unique 'generic' names to a new df
+unique_genus<- unique(c(as.character(taxa_range$genus)))
+#create a numberic df based on the unique genus
+taxa_range_colours<- data.frame(colours=as.numeric(factor(taxa_range$genus),levels=unique_genus))
+# add it back to the main df
+taxa_range$colours <- taxa_range_colours$colours
+```
+
+
+#generate time bins for plotting - assume full Mesozoic
+```{r}
+
+MesozoicPeriod_bins <- time_bins(interval = c("Mesozoic"),rank="period")
+MesozoicEpoch_bins <- time_bins(interval = c("Mesozoic"),rank="epoch")
+MesozoicStage_bins <- time_bins(interval = c("Mesozoic"),rank="stage")
+
+MesozoicPeriod_Occs <- bin_time(taxa_filter,MesozoicPeriod_bins)
+colnames(MesozoicPeriod_Occs)[colnames(MesozoicPeriod_Occs)=="bin_assignment"]="bin"
+MesozoicPeriod_Occs <- merge(MesozoicPeriod_Occs,MesozoicPeriod_bins[,c("bin","interval_name","colour")],by="bin")
+
+
+MesozoicEpoch_Occs <- bin_time(taxa_filter,MesozoicEpoch_bins)
+colnames(MesozoicEpoch_Occs)[colnames(MesozoicEpoch_Occs)=="bin_assignment"]="bin"
+MesozoicEpoch_Occs <- merge(MesozoicEpoch_Occs,MesozoicEpoch_bins[,c("bin","interval_name","colour")],by="bin")
+
+MesozoicStage_Occs  <- bin_time(taxa_filter,MesozoicStage_bins) 
+colnames(MesozoicStage_Occs)[colnames(MesozoicStage_Occs)=="bin_assignment"]="bin"
+MesozoicStage_Occs <- merge(MesozoicStage_Occs,MesozoicStage_bins[,c("bin","interval_name","colour")],by="bin")
+
+# summarise occurances by bin
+
+MesozoicStageSummary <- MesozoicStage_Occs %>%
+  group_by(bin_midpoint) %>%
+  summarise(count=n())
+
+# summary stage genera
+MesozoicStageGeneraSummary <- MesozoicStage_Occs %>%
+  group_by(bin_midpoint) %>%
+  summarise(count=n_distinct(genus))
+
+
+# or write to shapefile
+MesEpoch_Shp <- MesozoicEpoch_Occs
+coordinates(MesEpoch_Shp)=~lng+lat
+shapefile(MesEpoch_Shp,"MesozoicEpochOccs.shp")
+
+#create equal length bins for occ data - for diversity curve plots
+# use bin_ages function
+# https://psmits.github.io/paleo_book/managing-and-processing-data-from-the-paleobiology-database.html
+
+
+# create 10 my bins in column bin_age
+
+Mesozoic10ma_Occs <-
+  taxa_filter %>%
+  mutate(mid_ma = (max_ma + min_ma) / 2,
+         bin = bin_ages(mid_ma, by = 10))
+
+Mesozoic10ma_Occs <- 
+  Mesozoic10ma_Occs %>%
+  mutate(bin_age = bin_ages(mid_ma, by = 2, age = TRUE))
+
+# summary 10 ma occurences
+Mesozoic10maSummary <- Mesozoic10ma_Occs %>%
+  group_by(bin_age) %>%
+  summarise(count=n())
+
+# summary 10 ma genera
+Mesozoic10maGeneraSummary <- Mesozoic10ma_Occs %>%
+  group_by(bin_age) %>%
+  summarise(count=n_distinct(genus))
+```
+
+#Plot taxonomic range sorted by FAD
+```{r}
+# need to amend this plot so that the dumbell lines are coloured by taxon 
+
+# reorder the taxa FAD oldest to youngest
+taxa_range$taxon <- reorder(taxa_range$taxon,taxa_range$max_ma)
+p <- ggplot(data=taxa_range,aes(x=max_ma,xend=min_ma,y=taxon,group=taxon))+
+  geom_dumbbell(colour=taxa_range$colours, size=1) +
+  scale_x_reverse() +
+    theme_bw() +
+  theme(axis.title.x = element_blank()) +
+  labs(y="Taxon") +
+  theme(axis.line = element_line(color='black'),
+    plot.background = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_blank())
+
+
+p <- gggeo_scale(p, dat = "periods", height = unit(1.5, "lines"), rot = 0, size = 2.5, abbrv = FALSE)
+
+p <- gggeo_scale(p, dat = "epochs", height = unit(3, "lines"), rot = 90, size = 2.5, abbrv = TRUE)
+
+p <- gggeo_scale(p, dat = "stages", height = unit(3, "lines"), rot = 90, size = 2.5, abbrv = TRUE)
+```
+
+
+#plot occurence data 10 ma bins
+```{r}
+p <- ggplot(Mesozoic10maSummary,aes(x=bin_age,y=count))+
+ geom_line() +
+ theme_bw() +
+  scale_x_reverse() +
+  theme(axis.title.x = element_blank()) +
+  labs(y="Count")
+
+p <- gggeo_scale(p, dat = "stages", height = unit(2, "lines"), rot = 90, size = 2.5, abbrv = TRUE)
+
+pdf(file="10maBinOccs.pdf")
+p
+dev.off()
+
+```
+
+#oir just using the stage bins
+```{r}
+p <- ggplot(MesozoicStageSummary,aes(x=bin_midpoint,y=count))+
+ geom_line() +
+ theme_bw() +
+  scale_x_reverse() +
+  theme(axis.title.x = element_blank()) +
+  labs(y="Count") 
+
+
+p <- gggeo_scale(p, dat = "stages", height = unit(2, "lines"), rot = 90, size = 2.5, abbrv = TRUE)
+
+pdf(file="StageBinOccs.pdf")
+p
+dev.off()
+
+```
+
+# Plot Genera Summary
+```{r}
+p <- ggplot(MesozoicStageGeneraSummary,aes(x=bin_midpoint,y=count))+
+ geom_line() +
+ theme_bw() +
+  scale_x_reverse() +
+  theme(axis.title.x = element_blank()) +
+  labs(y="Count") 
+
+p <- gggeo_scale(p, dat = "stages", height = unit(2, "lines"), rot = 90, size = 2.5, abbrv = TRUE)
+
+pdf(file="StageBinGenera.pdf")
+p
+dev.off()
+
+```
+
+
+# plot both genera and occs on same plot
+```{r}
+
+SummaryGeneraOccs <-
+  merge(MesozoicStageSummary,MesozoicStageGeneraSummary,by="bin_midpoint") %>% 
+  rename(occs = count.x, genera = count.y)
+
+scale = 10
+
+p <- ggplot(SummaryGeneraOccs, aes(x = bin_midpoint, y=occs)) +
+  geom_line(color = "black", size=2) +
+  geom_line(aes(y=genera*10,color="OCC"),size=1) +
+  labs(y = "Genera count per stage bin") +
+  scale_y_continuous(sec.axis = sec_axis(~./10, name="OCC")) +
+  coord_cartesian(xlim=c(195.05,70)) +
+  scale_x_reverse() +
+  theme_bw() +
+  theme(axis.title.x = element_blank()) +
+  theme(axis.title.y = element_blank()) +
+  theme(legend.position="none") 
+
+
+ p <-  gggeo_scale(p, dat = "stages", height = unit(2, "lines"), rot = 90, size = 2.5, abbrv = TRUE)
+ 
+pdf(file="summarydiversity.pdf")
+p
+dev.off()
+ 
+ 
+ 
+
+  
+  
+
+
+
+

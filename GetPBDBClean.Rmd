@@ -1,0 +1,151 @@
+---
+title: "GetCleanPBDB"
+output:
+  html_document: default
+  word_document: default
+date: '2023-02-07'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# setup environment
+```{r}
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(velociraptr,palaeoverse,deeptime,tidyverse,divDyn,ape,phytools,paleotree,dispRity,ggalt,dplyr,ggplot2,RCurl,janitor,fossilbrush)
+```
+
+# download the PBDB data using the source API
+# interval_id = 2 selects the entire Mesozoic.
+
+```{r}
+#url <- "https://paleobiodb.org/data1.2/occs/list.csv?&interval_id=2&base_name=ornithischia^Krzyzanowskisaurus#^Gregaripus^Eoanomoepus^Shenmuichnus^%pus&show=class,coords,paleoloc,strat"
+
+# interval_id 2 = Mesozoic
+
+url <- "https://paleobiodb.org/data1.2/occs/list.csv?&interval_id=2&base_name=abrictosaurus,lycorhinus,lanasaurus,heterodontosaurus,echinodon,fruitadens,tianyulong,manidens,pegomastax,geranosaurus&show=class,coords,paleoloc,strat"
+
+taxa_df <- read.csv(url)
+```
+
+
+
+# now do some tidying up of the data by removing unwanted columns and remap any min_age that falls outside the Mesozoic.
+# Also remove any occurance with no order, family or genus
+# remove ootaxa and ichnotaxa
+# and remove some disputed taxa
+
+
+```{r}
+
+
+taxa_df$min_ma[taxa_df$min_ma < 66] <- 66
+
+# clean up the data
+
+taxa_filter <- 
+  taxa_df %>%
+  janitor::clean_names() %>%           # standardizes names
+  filter(accepted_rank %in% c('order','family','genus', 'species')) %>% # remove those records with no order, family, or genus
+  filter(!grepl("oolithidae",family)) %>% #remove ootaxa and ichnotaxa
+  filter(!grepl("podidae",family)) %>%
+  filter(!grepl("podos",genus)) %>%
+  filter(!grepl("podus",genus)) %>%
+  filter(!grepl("Fabrosauridae",accepted_name)) # remove 'fabrosauridae'
+
+# now copy the early_interval and late_interval to backups
+
+taxa_filter$late_intervalPBDB <- taxa_filter$late_interval
+taxa_filter$early_intervalPBDB <- taxa_filter$early_interval
+
+#now modify the ealy and later interval column to remove "Early, Middle or Late"
+taxa_filter$early_interval <- sub('Early ','',taxa_filter$early_interval)
+taxa_filter$early_interval <- sub('Middle ','',taxa_filter$early_interval)
+taxa_filter$early_interval <- sub('Late ','',taxa_filter$early_interval)
+
+taxa_filter$late_interval <- sub('Early ','',taxa_filter$late_interval)
+taxa_filter$late_interval <- sub('Middle ','',taxa_filter$late_interval)
+taxa_filter$late_interval <- sub('Late ','',taxa_filter$late_interval)
+
+
+# now specifically modify the ages of Loricatosaurus Sarcolestes Callovosaurus to Callovian Middle Jurassic
+# and remap the Lower Shaximiao to Bajocian - Callovian  and Upper to Kimmeridgian / tithonian - See Hui et al (2022)
+# We don't need to change the actual Min and max ages as we are going to remap these later
+# the old code is at botom of document
+
+
+taxa_filter <- taxa_filter %>%
+   mutate(across(c(early_interval,late_interval),  ~ifelse(accepted_name=="Sarcolestes leedsi" | accepted_name=="Loricatosaurus priscus" | accepted_name=="Callovosaurus leedsi" ,"Callovian",.))) %>%
+#  mutate(across(c(early_interval,late_interval),  ~ifelse(formation=="Shaximiao" & member=="Lower","Oxfordian",.))) %>%
+  mutate(across(c(early_interval),  ~ifelse(formation=="Shaximiao" & member=="Lower","Bajocian",.))) %>%
+  mutate(across(c(late_interval),  ~ifelse(formation=="Shaximiao" & member=="Lower","Callovian",.))) %>%
+  mutate(across(c(early_interval),  ~ifelse(formation=="Shaximiao" & member=="Upper","Kimmeridgian",.))) %>%
+  mutate(across(c(late_interval),  ~ifelse(formation=="Shaximiao" & member=="Upper","Tithonian",.)))
+
+
+# use the fossilbrush package to clean up chronostratigraphic information to GTS2020 values
+
+taxa_filter <- chrono_scale(taxa_filter, srt = "early_interval", end = "late_interval",max_ma = "max_ma", min_ma = "min_ma", verbose = FALSE)
+
+# a bit more cleaning to remove some dubious occurences (by occ number)
+
+occ_num_filter <- c(269492,790507,1091923,627694,588013,61891,1556488)
+
+taxa_filter <- taxa_filter %>%
+  filter(!occurrence_no %in% occ_num_filter)
+
+
+# reorder the columns to put the original min/max ma and the new min/max ma together for ease.
+# the new intervals are named newFAD and lastFAD from chrono_scale function
+taxa_filter <- cbind(taxa_filter[,c(1:16)], taxa_filter[,c(34:35)], taxa_filter[,c(17:33)])
+
+
+# rename the cols to fit later coding
+# original min and max ma to PBDBmin_ma and PBDBmax_ma and the GTS2020 codes to min mand max_ma
+taxa_filter <- taxa_filter %>% 
+  rename(
+    min_maPBDB = min_ma,
+    max_maPBDB = max_ma,
+    min_ma = newLAD,
+    max_ma = newFAD
+    )
+
+
+
+```
+
+
+
+```{r}
+# get unique taxa
+
+taxa_unique <- tax_unique(occdf = taxa_filter, genus = "genus", family = "family", order = "order", class = "class", name="accepted_name",resolution = "genus")
+
+```
+
+# old remapping code
+```{r}
+
+# now specifically modify the ages of Loricatosaurus Sarcolestes Callovosaurus to Callovian Middle Jurassic
+
+taxa_filter <- taxa_filter %>%
+  mutate(across(c(min_ma),  ~ifelse(accepted_name=="Sarcolestes leedsi" | accepted_name=="Loricatosaurus priscus" | accepted_name=="Callovosaurus leedsi" ,163.5,.))) %>%
+  mutate(across(c(max_ma),  ~ifelse(accepted_name=="Sarcolestes leedsi" | accepted_name=="Loricatosaurus priscus" | accepted_name=="Callovosaurus leedsi" ,166.1,.))) %>%
+  mutate(across(c(early_interval,late_interval),  ~ifelse(accepted_name=="Sarcolestes leedsi" | accepted_name=="Loricatosaurus priscus" | accepted_name=="Callovosaurus leedsi" ,"Callovian",.))) 
+
+# Now some remapping of formation ages
+ #First remap the Lower Shaximiao to Oxfordian and the Upper to Kimmeridgian to Tithonian
+
+taxa_filter <- taxa_filter %>%
+  mutate(across(c(max_ma),  ~ifelse(formation=="Shaximiao" & member=="Lower",166.1,.))) %>%
+  mutate(across(c(min_ma),  ~ifelse(formation=="Shaximiao" & member=="Lower",163.5,.))) %>%
+  mutate(across(c(early_interval,late_interval),  ~ifelse(formation=="Shaximiao" & member=="Lower","Oxfordian",.))) %>%
+  mutate(across(c(early_interval),  ~ifelse(formation=="Shaximiao" & member=="Upper","Kimmeridgian",.))) %>%
+  mutate(across(c(late_interval),  ~ifelse(formation=="Shaximiao" & member=="Upper","Tithonian",.))) %>%
+  mutate(across(c(max_ma),  ~ifelse(formation=="Shaximiao" & member=="Upper",157.3,.))) %>%
+  mutate(across(c(min_ma),  ~ifelse(formation=="Shaximiao" & member=="Upper",145,.)))
+
+```
+

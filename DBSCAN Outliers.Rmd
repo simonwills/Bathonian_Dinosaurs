@@ -24,12 +24,13 @@ pacman::p_load(centroidr,dbscan,fpc,jsonlite,shiny,GGally,WVPlots,ggplot2,SamSPE
 
 ## Now load up data to test for outliers.
 ## We need a data frame with a Specimen ID, Taxon (or grouping taxon) and the varibales to test for outliers
-## The varibles could either be in 'raw' state or ordinated such as MDA, PCA or t-SNE
+## The variables could either be in 'raw' state or ordinated such as MDA, PCA or t-SNE
 ## I generally use MDA 
 
 ```{r}
 df <- read.csv("C:/Users/swill/OneDrive - Natural History Museum/Manuscripts/PhD Chapters/MainThesis/CompleteThesis/DataForAppendicies/RESULTS_TrainingDatawithPostProbs_and_MDA.csv")
 
+# this just chooses the columns with the specimen ID and the data variables to pass to DBSCAN
 df <- as.data.frame(df[,c(2,3,46,47,48,49,50)])
 ```
 

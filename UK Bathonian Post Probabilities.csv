@@ -1,0 +1,80 @@
+Specimen,Locality,Actual,Majority Vote,Combined posterior probability,P
+GLRCM G100-14,Hornsleasow   ,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.87
+GLRCM G100-21,Hornsleasow,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.88
+GLRCM G100-9,Hornsleasow,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.87
+GLRCM G140-7,Hornsleasow,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.88
+GLRCM G14-27,Hornsleasow,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.87
+GLRCM G21-22,Hornsleasow,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.88
+GLRCM G38-10,Hornsleasow,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.87
+GLRCM G75704,Hornsleasow,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.88
+GLRCM G91702,Hornsleasow,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.85
+GLRCM G91705,Hornsleasow,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.86
+GLRCM G91706,Hornsleasow,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.88
+NHMUK PV R 37904,Hornsleasow,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.87
+NHMUK PV R 37905,Hornsleasow,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.76
+NHMUK PV R 37906,Hornsleasow,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.86
+NHMUK PV R 37907,Kirtlington,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.87
+NHMUK PV R 37908,Kirtlington,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.87
+NHMUK PV R 37910,Kirtlington,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.68
+NHMUK PV R 37924,Kirtlington,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.77
+NHMUK PV R 37925,Kirtlington,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.76
+NHMUK PV R 37926,Kirtlington,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.77
+NHMUK PV R 37927,Kirtlington,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.87
+NHMUK PV R 37928,Woodeaton,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.88
+NHMUK PV R 37929,Woodeaton,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.75
+NHMUK PV R 37935,Woodeaton,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.87
+NHMUK PV R 37939,Woodeaton,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.7
+NHMUK PV R 37940,Woodeaton,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.87
+NHMUK PV R 37941,Woodeaton,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.87
+NHMUK PV R 37942,Woodeaton,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.83
+NHMUK PV R 37944,Woodeaton,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.66
+NHMUK PV R 37945,Woodeaton,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.85
+NHMUK PV R 37946,Woodeaton,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.84
+NHMUK PV R 37947,Woodeaton,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.64
+NHMUK PV R 37948,Woodeaton,Dromaeosaur  A,Troodontidae,Troodontidae,0.72
+NHMUK PV R 37949,Woodeaton,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.81
+NHMUK PV R 37950,Woodeaton,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.86
+NHMUK PV R 37953,Woodeaton,Dromaeosaur  A,Dromaeosaur  A,Dromaeosaur  A,0.87
+GCRLM GTUBE 67,Hornsleasow,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,1
+GLRCM G10022,Hornsleasow,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,1
+GLRCM G100-64,Hornsleasow,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,1
+GLRCM G10-37,Hornsleasow,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,0.98
+GLRCM G12-28,Hornsleasow,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,1
+GLRCM G14-22,Hornsleasow,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,1
+GLRCM G167-24,Hornsleasow,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,1
+GLRCM G68-1,Hornsleasow,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,0.98
+GLRCM G7.219-3,Hornsleasow,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,1
+GLRCM GHQ 104 C -1,Hornsleasow,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,1
+GLRCM GTEMP3061,Hornsleasow,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,1
+GLRCM GX,Hornsleasow,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,1
+NHMUK PV R 36771,Watton Cliff,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,1
+NHMUK PV R 36778,Watton Cliff,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,0.98
+NHMUK PV R 37909,Kirtlington,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,0.98
+NHMUK PV R 37911,Kirtlington,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,0.99
+NHMUK PV R 37912,Kirtlington,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,0.99
+NHMUK PV R 37913,Kirtlington,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,0.96
+NHMUK PV R 37914,Kirtlington,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,0.97
+NHMUK PV R 37915,Kirtlington,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,1
+NHMUK PV R 37916,Kirtlington,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,0.97
+NHMUK PV R 37917,Kirtlington,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,1
+NHMUK PV R 37918,Kirtlington,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,1
+NHMUK PV R 37919,Kirtlington,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,1
+NHMUK PV R 37921,Kirtlington,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,1
+NHMUK PV R 37922,Kirtlington,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,0.93
+NHMUK PV R 37923,Kirtlington,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,0.83
+NHMUK PV R 37930,Woodeaton,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,0.97
+NHMUK PV R 37931,Woodeaton,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,1
+NHMUK PV R 37933,Woodeaton,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,1
+NHMUK PV R 37934,Woodeaton,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,1
+NHMUK PV R 37936,Woodeaton,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,1
+NHMUK PV R 37937,Woodeaton,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,0.92
+NHMUK PV R 37938,Woodeaton,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,0.59
+NHMUK PV R 37943,Woodeaton,Dromaeosaur  B,Troodontidae,Troodontidae,0.58
+NHMUK PV R 37951,Woodeaton,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,0.96
+NHMUK PV R 37952,Woodeaton,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,0.73
+NHMUK PV R XX_H5,Hornsleasow,Dromaeosaur  B,Dromaeosaur  B,Dromaeosaur  B,0.99
+NHMUK PV R 36779,Watton Cliff,Dromaeosaur  C,Dromaeosaur  B,Dromaeosaur  B,0.63
+NHMUK PV R 37058,Woodeaton,Dromaeosaur  C,Dromaeosaur  B,Dromaeosaur  B,0.57
+NHMUK PV R 37920,Kirtlington,Dromaeosaur  C,Dromaeosaur  C,Dromaeosaur  C,0.61
+GLRCM G167-32,Hornsleasow,Therizinosauria,Dromaeosaur  B,Dromaeosaur  B,0.99
+GLRCM G8-23,Hornsleasow,Troodontidae,Dromaeosaur  B,Dromaeosaur  B,0.98
